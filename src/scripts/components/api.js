@@ -53,6 +53,13 @@ export const addNewCard = ({ name, link }) => {
   }).then(getResponseData);
 };
 
+export const changeLikeCardStatus = (cardID, isLiked) => {
+  return fetch(`${config.baseUrl}/cards/likes/${cardID}`, {
+    method: isLiked ? "DELETE" : "PUT",
+    headers: config.headers,
+  }).then((res) => getResponseData(res));
+};
+
 export const deleteCard = (cardId) => {
   return fetch(`${config.baseUrl}/cards/${cardId}`, {
     method: "DELETE",
