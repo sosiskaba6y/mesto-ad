@@ -1,3 +1,12 @@
+export const updateLike = (likeButton, likeCountEl, likesCount) => {
+  likeButton.classList.toggle("card__like-button_is-active");
+  likeCountEl.textContent = likesCount;
+};
+
+export const deleteCard = (cardElement) => {
+  cardElement.remove();
+};
+
 const getTemplate = () => {
   return document
     .getElementById("card-template")
@@ -28,12 +37,7 @@ export const createCardElement = (
   if (onLikeIcon) {
     likeButton.addEventListener("click", () => {
       const isLiked = likeButton.classList.contains("card__like-button_is-active");
-      onLikeIcon(data._id, isLiked)
-        .then((updatedCard) => {
-          likeButton.classList.toggle("card__like-button_is-active");
-          likeCount.textContent = updatedCard.likes.length;
-        })
-        .catch((err) => console.log(err));
+      onLikeIcon(likeButton, likeCount, data._id, isLiked);
     });
   }
 

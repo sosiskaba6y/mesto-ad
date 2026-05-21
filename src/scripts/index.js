@@ -7,7 +7,7 @@
 */
 
 import { getCardList, getUserInfo, setUserInfo, setAvatar, addNewCard, deleteCard as deleteCardApi, changeLikeCardStatus } from "./components/api.js";
-import { createCardElement } from "./components/card.js";
+import { createCardElement, deleteCard, updateLike } from "./components/card.js";
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
 
@@ -69,10 +69,20 @@ const renderLoading = (isLoading, button, loadingText = "Сохранение...
   }
 };
 
+const handleLikeCard = (likeButton, likeCount, cardId, isLiked) => {
+  changeLikeCardStatus(cardId, isLiked)
+    .then((updatedCard) => {
+      updateLike(likeButton, likeCount, updatedCard.likes.length);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
 const handleDeleteCard = (cardElement, cardId) => {
   deleteCardApi(cardId)
     .then(() => {
-      cardElement.remove();
+      deleteCard(cardElement);
     })
     .catch((err) => {
       console.log(err);
@@ -137,7 +147,7 @@ const handleCardFormSubmit = (evt) => {
         newCardData,
         {
           onPreviewPicture: handlePreviewPicture,
-          onLikeIcon: changeLikeCardStatus,
+          onLikeIcon: handleLikeCard,
           onDeleteCard: handleDeleteCard,
         },
         currentUserId
@@ -265,7 +275,7 @@ Promise.all([getCardList(), getUserInfo()])
         cardData,
         {
           onPreviewPicture: handlePreviewPicture,
-          onLikeIcon: changeLikeCardStatus,
+          onLikeIcon: handleLikeCard,
           onDeleteCard: handleDeleteCard,
         },
         currentUserId
