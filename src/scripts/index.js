@@ -55,7 +55,10 @@ const infoStatsList = infoModalWindow.querySelector(".popup__info");
 const infoText = infoModalWindow.querySelector(".popup__text");
 const infoPopularList = infoModalWindow.querySelector(".popup__list");
 
+let currentUserId = null;
+
 const logo = document.querySelector(".logo");
+
 
 const renderLoading = (isLoading, button, loadingText = "Сохранение...") => {
   if (isLoading) {
@@ -248,7 +251,6 @@ allPopups.forEach((popup) => {
   setCloseModalWindowEventListeners(popup);
 });
 
-let currentUserId;
 Promise.all([getCardList(), getUserInfo()])
   .then(([cards, userData]) => {
     currentUserId = userData._id;
