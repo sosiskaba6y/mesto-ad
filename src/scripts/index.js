@@ -6,7 +6,8 @@
   Из index.js не допускается что то экспортировать
 */
 
-import { createCardElement, deleteCard, likeCard } from "./components/card.js";
+import { getCardList, getUserInfo, setUserInfo, setAvatar, addNewCard, deleteCard as deleteCardApi } from "./components/api.js";
+import { createCardElement, likeCard } from "./components/card.js";
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
 
@@ -48,6 +49,16 @@ const avatarFormModalWindow = document.querySelector(".popup_type_edit-avatar");
 const avatarForm = avatarFormModalWindow.querySelector(".popup__form");
 const avatarInput = avatarForm.querySelector(".popup__input");
 
+const handleDeleteCard = (cardElement, cardId) => {
+  deleteCardApi(cardId)
+    .then(() => {
+      cardElement.remove();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
 const handlePreviewPicture = ({ name, link }) => {
   imageElement.src = link;
   imageElement.alt = name;
@@ -73,6 +84,7 @@ const handleProfileFormSubmit = (evt) => {
 
 const handleAvatarFromSubmit = (evt) => {
   evt.preventDefault();
+  const newAvatarUrl = avatarInput.value;
   setAvatar({ avatar: newAvatarUrl })
     .then((userData) => {
       profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
@@ -85,21 +97,25 @@ const handleAvatarFromSubmit = (evt) => {
 
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
-  placesWrap.prepend(
-    createCardElement(
-      {
-        name: cardNameInput.value,
-        link: cardLinkInput.value,
-      },
-      {
-        onPreviewPicture: handlePreviewPicture,
-        onLikeIcon: likeCard,
-        onDeleteCard: deleteCard,
-      }
-    )
-  );
-
-  closeModalWindow(cardFormModalWindow);
+  const cardName = cardNameInput.value;
+  const cardLink = cardLinkInput.value;
+  addNewCard({ name: cardName, link: cardLink })
+    .then((newCardData) => {
+      const cardElement = createCardElement(
+        newCardData,
+        {
+          onPreviewPicture: handlePreviewPicture,
+          onLikeIcon: likeCard,
+          onDeleteCard: handleDeleteCard,
+        },
+        currentUserId
+      );
+      placesWrap.prepend(cardElement);
+      closeModalWindow(cardFormModalWindow);
+    })
+    .catch((err) => {
+      console.log(err);
+    })
 };
 
 // EventListeners
@@ -129,8 +145,10 @@ allPopups.forEach((popup) => {
   setCloseModalWindowEventListeners(popup);
 });
 
+let currentUserId;
 Promise.all([getCardList(), getUserInfo()])
   .then(([cards, userData]) => {
+    currentUserId = userData._id;
     profileTitle.textContent = userData.name;
     profileDescription.textContent = userData.about;
     profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
@@ -143,8 +161,9 @@ Promise.all([getCardList(), getUserInfo()])
         {
           onPreviewPicture: handlePreviewPicture,
           onLikeIcon: likeCard,
-          onDeleteCard: deleteCard,
-        }
+          onDeleteCard: handleDeleteCard,
+        },
+        currentUserId
       );
       placesWrap.append(cardElement);
     });
@@ -152,4 +171,3 @@ Promise.all([getCardList(), getUserInfo()])
   .catch((err) => {
     console.log(err); // В случае возникновения ошибки выводим её в консоль
   });
-
