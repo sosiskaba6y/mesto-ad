@@ -4,8 +4,8 @@
 ![изображение live-server](image.png)
 Live-server является расширением VSCode
 
-npm run dev
-npm run build
-npm run deploy
+- npm run dev
+- npm run build
+- npm run deploy
 
 https://sosiskaba6y.github.io/mesto-production/
